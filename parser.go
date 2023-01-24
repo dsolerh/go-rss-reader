@@ -7,7 +7,16 @@ import (
 )
 
 func Parse(urls ...string) []RSSItem {
-	return nil
+	items := make([]RSSItem, 0, len(urls))
+	itemsChan := make(chan []RSSItem)
+	for _, url := range urls {
+		go fetchURL(url, itemsChan)
+	}
+
+	for newItems := range itemsChan {
+		items = append(items, newItems...)
+	}
+	return items
 }
 
 func fetchURL(url string, ch chan<- []RSSItem) {
