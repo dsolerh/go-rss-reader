@@ -36,14 +36,21 @@ func parseData(data io.Reader) []RSSItem {
 
 	rssItems := make([]RSSItem, 0, len(r.Channel.Items))
 	for _, item := range r.Channel.Items {
-		rssItems = append(rssItems, RSSItem{
+		if item.Title == "" || item.Link == "" || item.Description == "" {
+			continue
+		}
+
+		rssItem := RSSItem{
 			Title:       item.Title,
 			Description: item.Description,
 			PublishDate: item.PubDate.value,
 			Link:        item.Link,
-			Source:      item.Source.Value,
-			SourceURL:   item.Source.URL,
-		})
+		}
+		if item.Source != nil {
+			rssItem.Source = item.Source.Value
+			rssItem.SourceURL = item.Source.URL
+		}
+		rssItems = append(rssItems, rssItem)
 	}
 	return rssItems
 }
