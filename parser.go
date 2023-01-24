@@ -31,7 +31,7 @@ func fetchURL(url string, ch chan<- []RSSItem) {
 func parseData(data io.Reader) []RSSItem {
 	var r rss
 	if err := xml.NewDecoder(data).Decode(&r); err != nil {
-		return nil
+		return []RSSItem{}
 	}
 
 	rssItems := make([]RSSItem, 0, len(r.Channel.Items))
