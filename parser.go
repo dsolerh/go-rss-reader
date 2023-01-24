@@ -17,16 +17,20 @@ func Parse(urls ...string) []RSSItem {
 		go fetchURL(url, itemsChan, &wg)
 	}
 
+	var done sync.WaitGroup
+	done.Add(1)
 	go func() {
 		for newItems := range itemsChan {
 			items = append(items, newItems...)
 		}
+		done.Done()
 	}()
 
 	wg.Wait()
 	itemsChan <- nil
 	close(itemsChan)
 
+	done.Wait()
 	return items
 }
 
