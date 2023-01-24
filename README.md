@@ -21,4 +21,37 @@ The dedinition for the `Parse` function and `RSSItem` can be found
 and [here](https://github.com/dsolerh/go-rss-reader/blob/main/item.go) 
 respectively.
 
-Any suggestions for a change are welcome.
+## Install
+
+`go get -u github.com/dsolerh/go-rss-reader`
+
+## Examples
+
+**As easy as:**
+
+```go
+package main
+import (
+    fmt
+
+	reader "github.com/dsolerh/go-rss-reader"
+)
+func main() {
+	urls := []string{
+		"http://yournews.com/rss",
+		"http://abc.com/feed",
+	}
+	items := reader.Parse(urls...)
+
+    fmt.Println(items)
+}
+```
+
+As a result you should see a list of `RSSItem` so long as the given URLs are
+correct and they contain valid xml feeds.
+
+## License
+
+Copyright (c) 2023-present [Daniel Soler](https://github.com/dsolerh)
+
+Licensed under [MIT License](./LICENSE)
