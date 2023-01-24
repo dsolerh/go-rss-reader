@@ -12,6 +12,7 @@ func Parse(urls ...string) []RSSItem {
 	itemsChan := make(chan []RSSItem)
 	var wg sync.WaitGroup
 	wg.Add(len(urls))
+
 	for _, url := range urls {
 		go fetchURL(url, itemsChan, &wg)
 	}
