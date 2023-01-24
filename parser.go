@@ -1,6 +1,7 @@
 package rssreader
 
 import (
+	"encoding/xml"
 	"io"
 	"net/http"
 )
@@ -27,6 +28,22 @@ func fetchURL(url string, ch chan<- []RSSItem) {
 	ch <- item
 }
 
-	return &RSSItem{}, nil
 func parseItem(data io.Reader) ([]RSSItem, error) {
+	var r rss
+	if err := xml.NewDecoder(data).Decode(&r); err != nil {
+		return nil, err
+	}
+
+	rssItems := make([]RSSItem, 0, len(r.Channel.Items))
+	for _, item := range r.Channel.Items {
+		rssItems = append(rssItems, RSSItem{
+			Title:       item.Title,
+			Description: item.Description,
+			PublishDate: item.PubDate.value,
+			Link:        item.Link,
+			Source:      item.Source.Value,
+			SourceURL:   item.Source.URL,
+		})
+	}
+	return rssItems, nil
 }
