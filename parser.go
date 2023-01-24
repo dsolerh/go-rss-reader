@@ -20,15 +20,15 @@ func fetchURL(url string, ch chan<- []RSSItem) {
 	if resp.StatusCode != http.StatusOK {
 		return
 	}
-	item, err := parseItem(resp.Body)
+	items, err := parseData(resp.Body)
 	if err != nil {
 		return
 	}
 
-	ch <- item
+	ch <- items
 }
 
-func parseItem(data io.Reader) ([]RSSItem, error) {
+func parseData(data io.Reader) ([]RSSItem, error) {
 	var r rss
 	if err := xml.NewDecoder(data).Decode(&r); err != nil {
 		return nil, err
