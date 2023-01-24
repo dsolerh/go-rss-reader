@@ -1,12 +1,56 @@
 package rssreader
 
 import (
+	"net/http"
 	"reflect"
 	"strings"
 	"testing"
 
 	"github.com/araddon/dateparse"
 )
+
+func TestParse(t *testing.T) {
+	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		switch r.URL.Query().Get("id") {
+		case "valid":
+			w.Write([]byte(schema_valid))
+		case "valid-date":
+			w.Write([]byte(schema_valid_date))
+		case "valid-source":
+			w.Write([]byte(schema_valid_source))
+		case "valid-no-item":
+			w.Write([]byte(schema_valid_no_item))
+		case "multi-items":
+			w.Write([]byte(schema_multi_items))
+		case "invalid":
+			w.Write([]byte(schema_invalid))
+		case "invalid-date":
+			w.Write([]byte(schema_invalid_date))
+		}
+	})
+	go func() {
+		err := http.ListenAndServe(":3000", nil)
+		if err != nil {
+			t.Error("couldn't setup the test")
+		}
+	}()
+
+	urls := []string{
+		"http://localhost:3000?id=valid",
+		"http://localhost:3000?id=valid-date",
+		"http://localhost:3000?id=valid-source",
+		"http://localhost:3000?id=valid-no-item",
+		"http://localhost:3000?id=multi-items",
+		"http://localhost:3000?id=invalid",
+		"http://localhost:3000?id=invalid-date",
+	}
+
+	items := Parse(urls...)
+
+	if len(items) != 5 {
+		t.Errorf("the amount of items should be 5 but is %d", len(items))
+	}
+}
 
 func Test_parseData(t *testing.T) {
 	testCases := []struct {
