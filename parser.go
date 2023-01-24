@@ -23,7 +23,9 @@ func Parse(urls ...string) []RSSItem {
 	}()
 
 	wg.Wait()
+	itemsChan <- nil
 	close(itemsChan)
+
 	return items
 }
 
