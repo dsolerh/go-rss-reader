@@ -1,5 +1,7 @@
 # go-rss-reader
 
+![tests](https://github.com/dsolerh/go-rss-reader/actions/workflows/test.yml/badge.svg)
+
 The `go-rss-reader` package helps manage HTTP request for RSS feeds.
 
 The principle is simple, it provides a `Parse` function who makes the requests to the 
