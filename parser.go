@@ -1,6 +1,7 @@
 package rssreader
 
 import (
+	"io"
 	"net/http"
 )
 
@@ -24,4 +25,8 @@ func fetchURL(url string, ch chan<- *RSSItem) {
 	}
 
 	ch <- item
+}
+
+func parseItem(data io.Reader) (*RSSItem, error) {
+	return &RSSItem{}, nil
 }
