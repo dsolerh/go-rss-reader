@@ -20,18 +20,18 @@ func fetchURL(url string, ch chan<- []RSSItem) {
 	if resp.StatusCode != http.StatusOK {
 		return
 	}
-	items, err := parseData(resp.Body)
-	if err != nil {
+	items := parseData(resp.Body)
+	if len(items) == 0 {
 		return
 	}
 
 	ch <- items
 }
 
-func parseData(data io.Reader) ([]RSSItem, error) {
+func parseData(data io.Reader) []RSSItem {
 	var r rss
 	if err := xml.NewDecoder(data).Decode(&r); err != nil {
-		return nil, err
+		return nil
 	}
 
 	rssItems := make([]RSSItem, 0, len(r.Channel.Items))
@@ -45,5 +45,5 @@ func parseData(data io.Reader) ([]RSSItem, error) {
 			SourceURL:   item.Source.URL,
 		})
 	}
-	return rssItems, nil
+	return rssItems
 }
