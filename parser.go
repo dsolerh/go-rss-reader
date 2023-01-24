@@ -4,22 +4,32 @@ import (
 	"encoding/xml"
 	"io"
 	"net/http"
+	"sync"
 )
 
 func Parse(urls ...string) []RSSItem {
 	items := make([]RSSItem, 0, len(urls))
 	itemsChan := make(chan []RSSItem)
+	var wg sync.WaitGroup
+	wg.Add(len(urls))
 	for _, url := range urls {
-		go fetchURL(url, itemsChan)
+		go fetchURL(url, itemsChan, &wg)
 	}
 
-	for newItems := range itemsChan {
-		items = append(items, newItems...)
-	}
+	go func() {
+		for newItems := range itemsChan {
+			items = append(items, newItems...)
+		}
+	}()
+
+	wg.Wait()
+	close(itemsChan)
 	return items
 }
 
-func fetchURL(url string, ch chan<- []RSSItem) {
+func fetchURL(url string, ch chan<- []RSSItem, wg *sync.WaitGroup) {
+	defer wg.Done()
+
 	resp, err := http.Get(url)
 	if err != nil {
 		return
