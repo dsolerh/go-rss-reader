@@ -50,6 +50,12 @@ func TestParse(t *testing.T) {
 	if len(items) != 5 {
 		t.Errorf("the amount of items should be 5 but is %d", len(items))
 	}
+
+	items = Parse("http://localhost:3000/invalid")
+
+	if len(items) != 0 {
+		t.Errorf("the amount of items should be 0 but is %d", len(items))
+	}
 }
 
 func Test_parseData(t *testing.T) {
