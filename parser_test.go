@@ -21,6 +21,29 @@ func Test_parseData(t *testing.T) {
 				{Title: "RSS Tutorial", Link: "https://www.w3schools.com/xml/xml_rss.asp", Description: "New RSS tutorial on W3Schools"},
 			},
 		},
+		{
+			desc:       "a valid schema (2 items)",
+			xml:        schema_multi_items,
+			itemLength: 2,
+			items: []RSSItem{
+				{Title: "RSS Tutorial", Link: "https://www.w3schools.com/xml/xml_rss.asp", Description: "New RSS tutorial on W3Schools"},
+				{Title: "RSS Tutorial", Link: "https://www.w3schools.com/xml/xml_rss.asp", Description: "New RSS tutorial on W3Schools"},
+			},
+		},
+		{
+			desc:       "a valid schema (source)",
+			xml:        schema_valid_source,
+			itemLength: 1,
+			items: []RSSItem{
+				{
+					Title:       "RSS Tutorial",
+					Link:        "https://www.w3schools.com/xml/xml_rss.asp",
+					Description: "New RSS tutorial on W3Schools",
+					Source:      "W3Schools.com",
+					SourceURL:   "https://www.w3schools.com",
+				},
+			},
+		},
 	}
 	for _, tC := range testCases {
 		t.Run(tC.desc, func(t *testing.T) {
@@ -54,7 +77,7 @@ var schema_valid = `
 </rss>
 `
 
-var shcema_multi_items = `
+var schema_multi_items = `
 <?xml version="1.0" encoding="UTF-8" ?>
 <rss version="2.0">
 
