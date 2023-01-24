@@ -4,6 +4,8 @@ import (
 	"reflect"
 	"strings"
 	"testing"
+
+	"github.com/araddon/dateparse"
 )
 
 func Test_parseData(t *testing.T) {
@@ -43,6 +45,37 @@ func Test_parseData(t *testing.T) {
 					SourceURL:   "https://www.w3schools.com",
 				},
 			},
+		},
+		{
+			desc:       "a valid schema (date)",
+			xml:        schema_valid_date,
+			itemLength: 1,
+			items: []RSSItem{
+				{
+					Title:       "RSS Tutorial",
+					Link:        "https://www.w3schools.com/xml/xml_rss.asp",
+					Description: "New RSS tutorial on W3Schools",
+					PublishDate: dateparse.MustParse("Thu, 27 Apr 2006"),
+				},
+			},
+		},
+		{
+			desc:       "an invalid schema",
+			xml:        schema_invalid,
+			itemLength: 0,
+			items:      []RSSItem{},
+		},
+		{
+			desc:       "an invalid schema (date)",
+			xml:        schema_invalid_date,
+			itemLength: 0,
+			items:      []RSSItem{},
+		},
+		{
+			desc:       "an valid schema (no item)",
+			xml:        schema_invalid,
+			itemLength: 0,
+			items:      []RSSItem{},
 		},
 	}
 	for _, tC := range testCases {
