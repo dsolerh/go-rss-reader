@@ -50,6 +50,9 @@ func main() {
 As a result you should see a list of `RSSItem` so long as the given URLs are
 correct and they contain valid xml feeds.
 
+**Note:** If the publish date of an item is not defined on the source the value would
+be the default for a `time.Time` struct.
+
 ## License
 
 Copyright (c) 2023-present [Daniel Soler](https://github.com/dsolerh)
