@@ -9,7 +9,7 @@ func Parse(urls ...string) []RSSItem {
 	return nil
 }
 
-func fetchURL(url string, ch chan<- *RSSItem) {
+func fetchURL(url string, ch chan<- []RSSItem) {
 	resp, err := http.Get(url)
 	if err != nil {
 		return
@@ -27,6 +27,6 @@ func fetchURL(url string, ch chan<- *RSSItem) {
 	ch <- item
 }
 
-func parseItem(data io.Reader) (*RSSItem, error) {
 	return &RSSItem{}, nil
+func parseItem(data io.Reader) ([]RSSItem, error) {
 }
