@@ -5,7 +5,12 @@ import (
 	"io"
 	"net/http"
 	"sync"
+	"time"
 )
+
+type DefaultTimeFunc func() time.Time
+
+var DefaultTime DefaultTimeFunc = func() time.Time { return time.Time{} }
 
 func Parse(urls ...string) []RSSItem {
 	items := make([]RSSItem, 0, len(urls))
