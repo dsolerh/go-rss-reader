@@ -4,6 +4,7 @@ import (
 	"encoding/xml"
 	"io"
 	"net/http"
+	"net/url"
 	"sync"
 	"time"
 )
@@ -51,7 +52,7 @@ func fetchURL(url string, ch chan<- []RSSItem, wg *sync.WaitGroup) {
 	if resp.StatusCode != http.StatusOK {
 		return
 	}
-	items := parseData(resp.Body)
+	items := parseData(resp.Body, url)
 	if len(items) == 0 {
 		return
 	}
@@ -59,7 +60,7 @@ func fetchURL(url string, ch chan<- []RSSItem, wg *sync.WaitGroup) {
 	ch <- items
 }
 
-func parseData(data io.Reader) []RSSItem {
+func parseData(data io.Reader, originURL string) []RSSItem {
 	var r rss
 	if err := xml.NewDecoder(data).Decode(&r); err != nil {
 		return []RSSItem{}
@@ -76,6 +77,7 @@ func parseData(data io.Reader) []RSSItem {
 			Description: item.Description,
 			Link:        item.Link,
 		}
+
 		if !item.PubDate.hasValue {
 			if DefaultTime == nil {
 				continue
@@ -85,11 +87,30 @@ func parseData(data io.Reader) []RSSItem {
 		} else {
 			rssItem.PublishDate = item.PubDate.value
 		}
+
 		if item.Source != nil {
 			rssItem.Source = item.Source.Value
 			rssItem.SourceURL = item.Source.URL
+		} else {
+			host := extractSource(originURL)
+			if host == "" {
+				continue
+			}
+			rssItem.Source = host
+			rssItem.SourceURL = originURL
+
 		}
+
 		rssItems = append(rssItems, rssItem)
 	}
 	return rssItems
+}
+
+func extractSource(urlRaw string) string {
+	u, err := url.Parse(urlRaw)
+	if err != nil {
+		return ""
+	}
+
+	return u.Hostname()
 }
