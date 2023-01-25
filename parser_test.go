@@ -14,8 +14,6 @@ func TestParse(t *testing.T) {
 		switch r.URL.Query().Get("id") {
 		case "valid":
 			w.Write([]byte(schema_valid))
-		case "valid-date":
-			w.Write([]byte(schema_valid_date))
 		case "valid-source":
 			w.Write([]byte(schema_valid_source))
 		case "valid-no-item":
@@ -37,7 +35,6 @@ func TestParse(t *testing.T) {
 
 	urls := []string{
 		"http://localhost:3000?id=valid",
-		"http://localhost:3000?id=valid-date",
 		"http://localhost:3000?id=valid-source",
 		"http://localhost:3000?id=valid-no-item",
 		"http://localhost:3000?id=multi-items",
@@ -47,8 +44,8 @@ func TestParse(t *testing.T) {
 
 	items := Parse(urls...)
 
-	if len(items) != 5 {
-		t.Errorf("the amount of items should be 5 but is %d", len(items))
+	if len(items) != 4 {
+		t.Errorf("the amount of items should be 4 but is %d", len(items))
 	}
 
 	items = Parse("http://localhost:3000/invalid")
@@ -70,7 +67,14 @@ func Test_parseData(t *testing.T) {
 			xml:        schema_valid,
 			itemLength: 1,
 			items: []RSSItem{
-				{Title: "RSS Tutorial", Link: "https://www.w3schools.com/xml/xml_rss.asp", Description: "New RSS tutorial on W3Schools"},
+				{
+					Title:       "RSS Tutorial",
+					Link:        "https://www.w3schools.com/xml/xml_rss.asp",
+					Description: "New RSS tutorial on W3Schools",
+					PublishDate: dateparse.MustParse("Thu, 27 Apr 2006"),
+					Source:      "localhost",
+					SourceURL:   "http://localhost:3001",
+				},
 			},
 		},
 		{
@@ -78,8 +82,22 @@ func Test_parseData(t *testing.T) {
 			xml:        schema_multi_items,
 			itemLength: 2,
 			items: []RSSItem{
-				{Title: "RSS Tutorial", Link: "https://www.w3schools.com/xml/xml_rss.asp", Description: "New RSS tutorial on W3Schools"},
-				{Title: "RSS Tutorial", Link: "https://www.w3schools.com/xml/xml_rss.asp", Description: "New RSS tutorial on W3Schools"},
+				{
+					Title:       "RSS Tutorial",
+					Link:        "https://www.w3schools.com/xml/xml_rss.asp",
+					Description: "New RSS tutorial on W3Schools",
+					PublishDate: dateparse.MustParse("Thu, 27 Apr 2006"),
+					Source:      "localhost",
+					SourceURL:   "http://localhost:3001",
+				},
+				{
+					Title:       "RSS Tutorial",
+					Link:        "https://www.w3schools.com/xml/xml_rss.asp",
+					Description: "New RSS tutorial on W3Schools",
+					PublishDate: dateparse.MustParse("Thu, 27 Apr 2006"),
+					Source:      "localhost",
+					SourceURL:   "http://localhost:3001",
+				},
 			},
 		},
 		{
@@ -91,21 +109,9 @@ func Test_parseData(t *testing.T) {
 					Title:       "RSS Tutorial",
 					Link:        "https://www.w3schools.com/xml/xml_rss.asp",
 					Description: "New RSS tutorial on W3Schools",
+					PublishDate: dateparse.MustParse("Thu, 27 Apr 2006"),
 					Source:      "W3Schools.com",
 					SourceURL:   "https://www.w3schools.com",
-				},
-			},
-		},
-		{
-			desc:       "a valid schema (date)",
-			xml:        schema_valid_date,
-			itemLength: 1,
-			items: []RSSItem{
-				{
-					Title:       "RSS Tutorial",
-					Link:        "https://www.w3schools.com/xml/xml_rss.asp",
-					Description: "New RSS tutorial on W3Schools",
-					PublishDate: dateparse.MustParse("Thu, 27 Apr 2006"),
 				},
 			},
 		},
@@ -131,12 +137,12 @@ func Test_parseData(t *testing.T) {
 	for _, tC := range testCases {
 		t.Run(tC.desc, func(t *testing.T) {
 			data := strings.NewReader(tC.xml)
-			items := parseData(data)
+			items := parseData(data, "http://localhost:3001")
 			if len(items) != tC.itemLength {
 				t.Errorf("the items parsed should be %d but are %d", tC.itemLength, len(items))
 			}
 			if !reflect.DeepEqual(items, tC.items) {
-				t.Errorf("the items should be %v", tC.items)
+				t.Errorf("the items should be %#v", tC.items)
 			}
 		})
 	}
@@ -154,6 +160,7 @@ var schema_valid = `
     <title>RSS Tutorial</title>
     <link>https://www.w3schools.com/xml/xml_rss.asp</link>
     <description>New RSS tutorial on W3Schools</description>
+    <pubDate>Thu, 27 Apr 2006</pubDate>
   </item>
 </channel>
 
@@ -172,11 +179,13 @@ var schema_multi_items = `
     <title>RSS Tutorial</title>
     <link>https://www.w3schools.com/xml/xml_rss.asp</link>
     <description>New RSS tutorial on W3Schools</description>
+    <pubDate>Thu, 27 Apr 2006</pubDate>
   </item>
   <item>
     <title>RSS Tutorial</title>
     <link>https://www.w3schools.com/xml/xml_rss.asp</link>
     <description>New RSS tutorial on W3Schools</description>
+    <pubDate>Thu, 27 Apr 2006</pubDate>
   </item>
 </channel>
 
@@ -196,23 +205,6 @@ var schema_valid_source = `
     <link>https://www.w3schools.com/xml/xml_rss.asp</link>
     <description>New RSS tutorial on W3Schools</description>
     <source url="https://www.w3schools.com">W3Schools.com</source>
-  </item>
-</channel>
-
-</rss>
-`
-var schema_valid_date = `
-<?xml version="1.0" encoding="UTF-8" ?>
-<rss version="2.0">
-
-<channel>
-  <title>W3Schools Home Page</title>
-  <link>https://www.w3schools.com</link>
-  <description>Free web building tutorials</description>
-  <item>
-    <title>RSS Tutorial</title>
-    <link>https://www.w3schools.com/xml/xml_rss.asp</link>
-    <description>New RSS tutorial on W3Schools</description>
     <pubDate>Thu, 27 Apr 2006</pubDate>
   </item>
 </channel>
