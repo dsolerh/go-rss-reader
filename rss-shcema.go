@@ -33,7 +33,8 @@ type item struct {
 
 // this is for custom unmarshaling of date
 type xmlTime struct {
-	value time.Time
+	value    time.Time
+	hasValue bool
 }
 
 func (t *xmlTime) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
@@ -41,9 +42,10 @@ func (t *xmlTime) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
 	d.DecodeElement(&dateString, &start)
 	dateTime, err := dateparse.ParseAny(dateString)
 	if err != nil {
+		*t = xmlTime{hasValue: false}
 		return err
 	}
-	*t = xmlTime{value: dateTime}
+	*t = xmlTime{value: dateTime, hasValue: true}
 	return nil
 }
 
