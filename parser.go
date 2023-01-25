@@ -74,8 +74,16 @@ func parseData(data io.Reader) []RSSItem {
 		rssItem := RSSItem{
 			Title:       item.Title,
 			Description: item.Description,
-			PublishDate: item.PubDate.value,
 			Link:        item.Link,
+		}
+		if !item.PubDate.hasValue {
+			if DefaultTime == nil {
+				continue
+			} else {
+				rssItem.PublishDate = DefaultTime()
+			}
+		} else {
+			rssItem.PublishDate = item.PubDate.value
 		}
 		if item.Source != nil {
 			rssItem.Source = item.Source.Value
