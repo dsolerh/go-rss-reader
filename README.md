@@ -12,9 +12,12 @@ The response is a slice of `RSSItem` which is a struct that contains the informa
 1. Title
 2. Link
 3. Description
-4. Publish Date (Optional)
-5. Source (Optional)
-6. Source URL (Optional)
+4. Publish Date (Defaults to `DefaultTime()`)
+5. Source (Defaults to the value of `url`'s host )
+6. Source URL (Defaults to the value of `url`)
+
+**Note:** `url` refers to the given url in the urls slice that you should pass to
+the `Parse` function
 
 The dedinition for the `Parse` function and `RSSItem` can be found 
 [here](https://github.com/dsolerh/go-rss-reader/blob/main/parser.go) 
@@ -38,7 +41,51 @@ import (
 )
 func main() {
 	urls := []string{
-		"http://yournews.com/rss",
+		"http://yournews.com/rss"
+		"http://abc.com/feed",
+	}
+	items := reader.Parse(urls...)
+
+    fmt.Println(items)
+}
+```
+
+**Use a default time function**
+
+```go
+package main
+import (
+    fmt
+
+	reader "github.com/dsolerh/go-rss-reader"
+)
+func main() {
+    reader.DefaultTime = time.Now // this sets the time if it's not defined on the source
+
+	urls := []string{
+		"http://yournews.com/rss"
+		"http://abc.com/feed",
+	}
+	items := reader.Parse(urls...)
+
+    fmt.Println(items)
+}
+```
+
+**Exclude when no publish time is present**
+
+```go
+package main
+import (
+    fmt
+
+	reader "github.com/dsolerh/go-rss-reader"
+)
+func main() {
+    reader.DefaultTime = nil // this makes the parse exclude the feeds if they don't include the `publish_time` field
+
+	urls := []string{
+		"http://yournews.com/rss"
 		"http://abc.com/feed",
 	}
 	items := reader.Parse(urls...)
@@ -49,9 +96,6 @@ func main() {
 
 As a result you should see a list of `RSSItem` so long as the given URLs are
 correct and they contain valid xml feeds.
-
-**Note:** If the publish date of an item is not defined on the source the value would
-be the default for a `time.Time` struct.
 
 ## License
 
